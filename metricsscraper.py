@@ -75,8 +75,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("url", help="URL to scrape", default="https://cloud.google.com/monitoring/api/metrics_gcp")
     parser.add_argument("--pretty", help="Pretty print JSON", action="store_const", const=True)
+    parser.add_argument("--jsonl", help="Line delimeted JSON", action="store_const", const=True)
     args = parser.parse_args()
     metrics = scrape_metrics(args.url)
+    if args.jsonl:
+        for k, v in metrics.items():
+            base_name = "%s.googleapis.com/" % (k)
+            for metric in v:
+                metric["id"] = "%s%s" % (base_name, metric["id"])
+                if args.pretty:
+                    print(json.dumps(metric, indent=2))
+                else:
+                    print(json.dumps(metric))
     if args.pretty:
         print(json.dumps(metrics, indent=2))
     else:
